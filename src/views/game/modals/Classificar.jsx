@@ -2,7 +2,9 @@ import React, { Component } from 'react'
 import Swiper from 'react-native-deck-swiper'
 import { Alert, Button, Image, StyleSheet, Text, View } from 'react-native'
 
-const Item = ({ user, tipo, title, url, mudarVez, vez, classificarRequisito, req }) => (
+import { BackHandler } from 'react-native';
+
+const Item = ({ user, tipo, title, url, classificarRequisito, req, navigation }) => (
     <View>
         <Image source={{ uri: url }} style={styles.imagem}></Image>
         <Button
@@ -15,12 +17,15 @@ const Item = ({ user, tipo, title, url, mudarVez, vez, classificarRequisito, req
                         [
                             {
                                 text: "Cancel",
-                                onPress: () => {
-                                    classificarRequisito(req, tipo, user)
-                                },
+                                onPress: () => { },
                                 style: "cancel"
                             },
-                            { text: "OK", onPress: () => mudarVez(vez) }
+                            {
+                                text: "OK", onPress: () => {
+                                    classificarRequisito(req, tipo, user)
+                                    navigation.goBack()
+                                }
+                            }
                         ],
                         { cancelable: false }
                     )
@@ -40,6 +45,20 @@ export default class ModalClassificar extends Component {
             swipeDirection: '',
             cardIndex: 0,
         }
+
+        this.handleBackButtonClick = this.handleBackButtonClick.bind(this);
+    }
+
+    componentDidMount() {
+        BackHandler.addEventListener('hardwareBackPress', this.handleBackButtonClick);
+    }
+
+    componentWillUnmount() {
+        BackHandler.removeEventListener('hardwareBackPress', this.handleBackButtonClick);
+    }
+
+    handleBackButtonClick() {
+        return false;
     }
 
     renderCard = (card) => {
@@ -49,9 +68,8 @@ export default class ModalClassificar extends Component {
                 tipo={card.tipo}
                 title={card.text}
                 url={card.url}
-                mudarVez={this.props.route.params.mudarVez}
-                vez={this.props.route.params.vez}
                 req={this.props.route.params.req}
+                navigation={this.props.navigation}
                 classificarRequisito={this.props.route.params.classificarRequisito}
             />
         )

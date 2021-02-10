@@ -2,8 +2,9 @@ import React, { Component } from "react";
 import { Text, Button, Image, View, StyleSheet, ActivityIndicator, Alert } from "react-native";
 import { TouchableOpacity } from "react-native-gesture-handler";
 
-import * as firebase from '../../api/firebase'
+import { BackHandler } from 'react-native';
 
+import * as firebase from '../../api/firebase'
 
 export default class Initial extends Component {
 
@@ -17,13 +18,25 @@ export default class Initial extends Component {
             tipos: null,
             bonus: null
         }
+
+        this.handleBackButtonClick = this.handleBackButtonClick.bind(this);
     }
 
     componentDidMount() {
         this.players()
         this.getUser()
+
+        BackHandler.addEventListener('hardwareBackPress', this.handleBackButtonClick);
     }
 
+    componentWillUnmount() {
+        BackHandler.removeEventListener('hardwareBackPress', this.handleBackButtonClick);
+    }
+
+    handleBackButtonClick() {
+        return false;
+    }
+    
     getUser() {
         var userId = firebase.auth.currentUser.uid;
 
@@ -84,8 +97,8 @@ export default class Initial extends Component {
             <View style={styles.container}>
                 <Image source={require('../home/LOGO-3.1-LARANJA.png')} style={styles.imagem} />
 
-                <ActivityIndicator animating={this.state.players <= 1} size="small" color="#FA7921" />
-                {players <= 1 && <Text style={styles.loading}>ESPERANDO JOGADORES</Text>}
+                <ActivityIndicator animating={this.state.players < 3} size="small" color="#FA7921" />
+                {players < 3 && <Text style={styles.loading}>ESPERANDO JOGADORES</Text>}
 
                 <View style={styles.containerBTN}>
                     {
@@ -173,7 +186,7 @@ export default class Initial extends Component {
                         </>
                     }
                     {
-                        players >= 1 &&
+                        players >= 3 &&
                         <TouchableOpacity
                             onPress={() => this.props.navigation.navigate('Game', { sala: sala, user: user, tipos: tipos })}>
                             <View style={styles.button}>

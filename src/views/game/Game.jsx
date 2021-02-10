@@ -1,7 +1,9 @@
 import React, { Component } from "react";
-import { Text, Image, View, StyleSheet, Button } from "react-native";
+import { Text, Image, View, StyleSheet, Button, Alert } from "react-native";
 
 import * as firebase from '../../api/firebase'
+
+import { BackHandler } from 'react-native';
 
 function Item(props) {
     var requisitos = props.reqs
@@ -16,7 +18,10 @@ function Item(props) {
         if (element['classificada'] == false) return (
             <>
                 <View style={styles.containerImagem}>
-                    <Image source={{ uri: element['url'] }} style={styles.imagem}></Image>
+                    <Image
+                        source={{ uri: element['url'] }}
+                        style={styles.imagem}
+                    ></Image>
 
                 </View>
 
@@ -65,10 +70,29 @@ function Item(props) {
                     }
                 </View>
             </>
+
         )
     }
 
-    return <Text>TERMINOU</Text>
+    return (
+        <>
+            <View style={styles.containerImagem}>
+                <Image source={require('./carta-verso.png')} style={styles.imagem}></Image>
+            </View>
+
+            <View style={styles.containerBTN}>
+                <Button
+                    color='#1785C1'
+                    title='RANKING'
+                    onPress={
+                        () =>
+                            props.navigation.navigate('Ranking', { players: props.sala.players })
+                    }
+                />
+            </View>
+        </>
+    )
+
 }
 
 
@@ -80,14 +104,14 @@ export default class Game extends Component {
             sala: this.props.route.params.sala,
             user: this.props.route.params.user,
             tipos: this.props.route.params.tipos,
-            seg: 0,
-            min: 0,
             requisitosClassificar: this.props.route.params.sala.reqs,
             ordemJogada: null,
-            vez: null
+            vez: null,
         }
 
         this.mudarVez = this.mudarVez.bind(this)
+        this.handleBackButtonClick = this.handleBackButtonClick.bind(this)
+        this.classificarRequisito = this.classificarRequisito.bind(this)
     }
 
 
@@ -98,12 +122,18 @@ export default class Game extends Component {
             this.setState({ vez: data.ordemDeJogada[0] })
             this.setState({ requisitosClassificar: data.reqs });
         });
+        BackHandler.addEventListener('hardwareBackPress', this.handleBackButtonClick);
+    }
 
-        setInterval(this.clock, 1000);
+    componentWillUnmount() {
+        BackHandler.removeEventListener('hardwareBackPress', this.handleBackButtonClick);
+    }
+
+    handleBackButtonClick() {
+        return false;
     }
 
     mudarVez(vez) {
-        console.log(vez);
         for (let i = 0; i < this.state.ordemJogada.length; i++) {
             const element = this.state.ordemJogada[i];
             if (vez == element && i == (this.state.ordemJogada.length - 1)) {
@@ -121,14 +151,22 @@ export default class Game extends Component {
         if (_tipo == tipo) {
             this.editarRequisitos(_requisito)
             this.pontuacao(user)
+            this.props.route.navigation.navigate('Bonus', {
+                vez: this.state.vez,
+                mudarVez: this.mudarVez.bind(this),
+                sala: this.state.sala,
+                user: this.state.user
+            })
+
+        } else {
+            Alert.alert('VOCÊ ERROU!');
+            this.mudarVez(this.state.vez)
         }
-        else console.log('ERROUUU');
     }
 
     editarRequisitos = (requisito) => {
         firebase.db.ref('rooms/' + this.state.sala.name + '/reqs/' + requisito['name'])
             .update({ classificada: true })
-
     }
 
     pontuacao = (user) => {
@@ -136,40 +174,17 @@ export default class Game extends Component {
         const _user = user.nickname
         const player = sala.players[_user]
 
-        firebase.db.ref('rooms/' + sala.name + '/players/' + user)
+        firebase.db.ref('rooms/' + sala.name + '/players/' + _user)
             .update({ pontuacao: player.pontuacao + 1, requisitosClassificados: player.requisitosClassificados + 1 })
 
     }
 
-    clock = () => {
-        if (this.state.seg == 60) {
-            this.setState({ min: this.state.min + 1 })
-            this.setState({ seg: 0 })
-        }
-        if (this.state.min == 5) {
-            this.setState({ min: 0 })
-            this.setState({ seg: 0 })
-        }
-
-        this.setState({ seg: this.state.seg + 1 })
-    }
-
-
     render() {
-        const { sala, tipos, min, seg, user, vez, requisitosClassificar } = this.state
+        const { sala, tipos, user, vez, requisitosClassificar, bonus } = this.state
 
 
         return (
             <View style={styles.container}>
-                <View style={
-                    {
-                        alignItems: 'center',
-                        justifyContent: 'center'
-                    }
-                }>
-                    <Text style={styles.time}>Tempo {"0" + min} : {seg >= 10 ? seg : "0" + seg}</Text>
-                </View>
-
                 <Item
                     reqs={requisitosClassificar}
                     sala={sala}
@@ -179,6 +194,7 @@ export default class Game extends Component {
                     vez={vez}
                     mudarVez={this.mudarVez.bind(this)}
                     classificarRequisito={this.classificarRequisito.bind(this)}
+                    bonus={bonus}
                 ></Item>
             </View>
         )

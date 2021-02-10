@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import { Text, TextInput, Image, View, StyleSheet, TouchableOpacity, ActivityIndicator, Alert } from "react-native";
+import { BackHandler } from 'react-native';
 
 import * as firebase from '../../api/firebase'
 
@@ -10,6 +11,7 @@ export default class Room extends Component {
         this.state = { nome: '', loading: false, user: '' }
 
         this.sala = this.sala.bind(this)
+        this.handleBackButtonClick = this.handleBackButtonClick.bind(this);
     }
 
     componentDidMount() {
@@ -17,7 +19,18 @@ export default class Room extends Component {
         firebase.db.ref('/users/' + userId).once('value').then((snapshot) => {
             this.setState({ user: snapshot.val() })
         });
+
+        BackHandler.addEventListener('hardwareBackPress', this.handleBackButtonClick);
     }
+
+    componentWillUnmount() {
+        BackHandler.removeEventListener('hardwareBackPress', this.handleBackButtonClick);
+    }
+
+    handleBackButtonClick() {
+        return false;
+    }
+    
 
     async sala() {
         if (this.state.nome) {
@@ -48,6 +61,8 @@ export default class Room extends Component {
 
                     this.setState({ loading: false })
                     this.props.navigation.navigate('Inicial', { nome: this.state.nome })
+                } else {
+                    Alert.alert('Sala cheia!')
                 }
             } else {
 

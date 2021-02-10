@@ -15,9 +15,9 @@ import Classificar from '../views/game/modals/Classificar'
 import Ajuda from '../views/game/modals/Ajuda'
 import Bonus from '../views/game/modals/Bonus'
 
-const Stack = createStackNavigator();
+import Ranking from '../views/ranking/Ranking'
 
-import * as firebase from '../api/firebase'
+const Stack = createStackNavigator();
 
 export default class Router extends Component {
 
@@ -152,6 +152,9 @@ export default class Router extends Component {
                             }
                         }
                     />
+
+                    <Stack.Screen name="Ranking" component={Ranking} options={estiloCabecalho} />
+
                 </Stack.Navigator>
             </NavigationContainer>
         )

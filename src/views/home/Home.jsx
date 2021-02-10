@@ -1,7 +1,26 @@
 import React, { Component } from "react";
 import { Text, Image, View, StyleSheet, TouchableOpacity, Button } from "react-native";
 
+import { BackHandler } from 'react-native';
+
 export default class Home extends Component {
+   
+    constructor(props) {
+        super(props);
+        this.handleBackButtonClick = this.handleBackButtonClick.bind(this);
+    }
+
+    componentDidMount() {
+        BackHandler.addEventListener('hardwareBackPress', this.handleBackButtonClick);
+    }
+
+    componentWillUnmount() {
+        BackHandler.removeEventListener('hardwareBackPress', this.handleBackButtonClick);
+    }
+
+    handleBackButtonClick() {
+        return false;
+    }
 
     render() {
         return (

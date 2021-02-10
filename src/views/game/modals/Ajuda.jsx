@@ -1,6 +1,8 @@
 import React, { Component } from "react";
 import { Text, View, StyleSheet, Button, Alert, Image } from "react-native";
-import { ScrollView, TouchableOpacity } from "react-native-gesture-handler";
+import { TouchableOpacity } from "react-native-gesture-handler";
+
+import { BackHandler } from 'react-native';
 
 import CardFlip from 'react-native-card-flip';
 
@@ -63,6 +65,8 @@ export default class AjudaScreen extends Component {
         }
 
         this.usarAnalista = this.usarAnalista.bind(this)
+        this.usarProgramador = this.usarProgramador.bind(this)
+        this.handleBackButtonClick = this.handleBackButtonClick.bind(this);
     }
 
     componentDidMount() {
@@ -85,6 +89,16 @@ export default class AjudaScreen extends Component {
                 this.setState({ programador: snapshot.val() })
             })
         }
+
+        BackHandler.addEventListener('hardwareBackPress', this.handleBackButtonClick);
+    }
+
+    componentWillUnmount(){
+        BackHandler.removeEventListener('hardwareBackPress', this.handleBackButtonClick);
+    }
+
+    handleBackButtonClick() {
+        return false;
     }
 
     usarAnalista() {
@@ -120,8 +134,6 @@ export default class AjudaScreen extends Component {
                             tipos: this.state.tipos,
                             req: this.state.req,
                             user: this.state.user,
-                            mudarVez: this.props.route.params.mudarVez,
-                            vez: this.props.route.params.vez,
                             classificarRequisito: this.props.route.params.classificarRequisito
                         })
                 }
