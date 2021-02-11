@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { Text, TextInput, Image, View, StyleSheet, TouchableOpacity, ActivityIndicator, Alert } from "react-native";
+import { Text, TextInput, Image, View, StyleSheet, TouchableOpacity, ActivityIndicator, Alert, Button } from "react-native";
 import { BackHandler } from 'react-native';
 
 import * as firebase from '../../api/firebase'
@@ -28,9 +28,9 @@ export default class Room extends Component {
     }
 
     handleBackButtonClick() {
-        return false;
+        return true;
     }
-    
+
 
     async sala() {
         if (this.state.nome) {
@@ -42,14 +42,14 @@ export default class Room extends Component {
 
                     if (!sala.players.hasOwnProperty(this.state.user.nickname)) {
                         var ordem = sala.ordemDeJogada
-                        ordem.push(this.state.user.nickname)
-                        
-                        firebase.db.ref('rooms/' + sala.name).update({ qtd: sala.qtd + 1, ordemDeJogada: ordem  });
+                        ordem.push({ nickname: this.state.user.nickname, vez: false })
+
+                        firebase.db.ref('rooms/' + sala.name).update({ qtd: sala.qtd + 1, ordemDeJogada: ordem });
                         firebase.db.ref('rooms/' + sala.name + '/players/' + this.state.user.nickname)
                             .set(
                                 {
                                     nickname: this.state.user.nickname,
-                                    ajudasAnalista: 2,
+                                    ajudasAnalista: 1,
                                     ajudasProgramador: 2,
                                     requisitosClassificados: 0,
                                     pontuacao: 0
@@ -67,7 +67,7 @@ export default class Room extends Component {
             } else {
 
                 const ordem = []
-                ordem.push(this.state.user.nickname)
+                ordem.push({ nickname: this.state.user.nickname, vez: true })
 
                 const element = {
                     name: this.state.nome,
@@ -82,7 +82,7 @@ export default class Room extends Component {
                 firebase.db.ref('rooms/' + element.name + '/players/' + this.state.user.nickname).set({
                     nickname: this.state.user.nickname,
                     ajudasAnalista: 1,
-                    ajudasProgramador: 3,
+                    ajudasProgramador: 2,
                     requisitosClassificados: 0,
                     pontuacao: 0
                 })
@@ -98,28 +98,30 @@ export default class Room extends Component {
     render() {
         return (
             <View style={styles.container}>
-                <Image source={require('../home/LOGO-3.1-LARANJA.png')} style={styles.imagem} />
-                <Text>Vamos Começar!</Text>
+                <View style={styles.containerImagem}>
+                    <Image source={require('../home/LOGO-3.1-LARANJA.png')} style={styles.imagem} />
+                    <Text>Vamos Começar!</Text>
 
-                <ActivityIndicator animating={this.state.loading} size="small" color="#FA7921" />
+                    <ActivityIndicator animating={this.state.loading} size="small" color="#FA7921" />
 
-                <TextInput
-                    style={styles.textInput}
-                    onChangeText={(nome) => this.setState({ nome })}
-                    placeholder="Nome da Sala"
-                />
-
-                <TouchableOpacity
-                    onPress={
-                        () => {
-                            this.setState({ loading: true })
-                            this.sala()
-                        }
-                    }>
-                    <View style={styles.button}>
-                        <Text style={styles.buttonText}>JOGAR</Text>
+                    <TextInput
+                        style={styles.textInput}
+                        onChangeText={(nome) => this.setState({ nome })}
+                        placeholder="Nome da Sala"
+                    />
+                    <View style={styles.containerBTN}>
+                        <Button
+                            color='#FA7921'
+                            title='JOGAR'
+                            onPress={
+                                () => {
+                                    this.setState({ loading: true })
+                                    this.sala()
+                                }
+                            }
+                        />
                     </View>
-                </TouchableOpacity>
+                </View>
             </View>
         )
     }
@@ -129,27 +131,25 @@ export default class Room extends Component {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
+        alignItems: 'stretch',
+        justifyContent: 'space-around',
+        backgroundColor: '#feddc7',
+    },
+
+    containerImagem: {
+        height: 'auto',
         alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor: '#feddc7'
+        justifyContent: 'space-evenly',
     },
 
     imagem: {
-        width: 100,
-        height: 200,
-        marginBottom: 15
+        width: '40%',
+        height: '40%',
     },
 
-    button: {
-        marginBottom: 30,
-        width: 250,
-        alignItems: 'center',
-        backgroundColor: '#FA7921',
-    },
-
-    buttonText: {
-        padding: 10,
-        color: 'white'
+    containerBTN: {
+        width: "80%",
+        alignItems: 'stretch',
     },
 
     textInput: {
@@ -158,7 +158,6 @@ const styles = StyleSheet.create({
         borderColor: "#fa7921",
         borderWidth: 2,
         paddingLeft: 20,
-        margin: 15,
         color: '#111111'
     }
 })

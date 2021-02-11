@@ -16,61 +16,54 @@ function Item(props) {
     for (let i = 0; i < reqs.length; i++) {
         const element = reqs[i];
         if (element['classificada'] == false) return (
-            <>
-                <View style={styles.containerImagem}>
-                    <Image
-                        source={{ uri: element['url'] }}
-                        style={styles.imagem}
-                    ></Image>
-
+            <View style={styles.containerImagem}>
+                <View style={styles.containerRanking}>
+                    <Text style={styles.textRanking}>JOGADOR: <Text style={{ color: '#0D7A18' }}>{props.vez}</Text></Text>
                 </View>
+                <Image
+                    source={{ uri: element['url'] }}
+                    style={styles.imagem}
+                ></Image>
 
-                <View style={styles.containerBTN}>
-                    {props.vez == props.user.nickname &&
-                        <>
-                            <View style={styles.buttonClassificar}>
-                                <Button
-                                    color='#0D7A18'
-                                    title='CLASSIFICAR'
-                                    onPress={
-                                        () =>
-                                            props.navigation.navigate('Classificar',
-                                                {
-                                                    tipos: props.tipos,
-                                                    req: element,
-                                                    user: props.user,
-                                                    vez: props.vez,
-                                                    mudarVez: props.mudarVez,
-                                                    classificarRequisito: props.classificarRequisito,
-                                                })
-                                    }
-                                />
-                            </View>
+                {props.vez == props.user.nickname &&
+                    <>
+                        <Button
+                            color='#0D7A18'
+                            title='CLASSIFICAR'
+                            onPress={
+                                () =>
+                                    props.navigation.navigate('Classificar',
+                                        {
+                                            tipos: props.tipos,
+                                            req: element,
+                                            user: props.user,
+                                            vez: props.vez,
+                                            mudarVez: props.mudarVez,
+                                            classificarRequisito: props.classificarRequisito,
+                                        })
+                            }
+                        />
 
-                            <View style={styles.buttonAjuda}>
-                                <Button
-                                    color='#1785C1'
-                                    title='AJUDA'
-                                    onPress={
-                                        () =>
-                                            props.navigation.navigate('Ajuda',
-                                                {
-                                                    req: element,
-                                                    sala: props.sala,
-                                                    user: props.user,
-                                                    tipos: props.tipos,
-                                                    vez: props.vez,
-                                                    mudarVez: props.mudarVez,
-                                                    classificarRequisito: props.classificarRequisito,
-                                                })
-                                    }
-                                />
-                            </View>
-                        </>
-                    }
-                </View>
-            </>
-
+                        <Button
+                            color='#1785C1'
+                            title='AJUDA'
+                            onPress={
+                                () =>
+                                    props.navigation.navigate('Ajuda',
+                                        {
+                                            req: element,
+                                            sala: props.sala,
+                                            user: props.user,
+                                            tipos: props.tipos,
+                                            vez: props.vez,
+                                            mudarVez: props.mudarVez,
+                                            classificarRequisito: props.classificarRequisito,
+                                        })
+                            }
+                        />
+                    </>
+                }
+            </View>
         )
     }
 
@@ -107,6 +100,7 @@ export default class Game extends Component {
             requisitosClassificar: this.props.route.params.sala.reqs,
             ordemJogada: null,
             vez: null,
+            bonus: false
         }
 
         this.mudarVez = this.mudarVez.bind(this)
@@ -116,12 +110,21 @@ export default class Game extends Component {
 
 
     componentDidMount() {
+        var _ordemJogada = null
         firebase.db.ref('rooms/' + this.state.sala.name).on('value', (snapshot) => {
             const data = snapshot.val();
+            _ordemJogada = data.ordemDeJogada
+
             this.setState({ ordemJogada: data.ordemDeJogada })
-            this.setState({ vez: data.ordemDeJogada[0] })
-            this.setState({ requisitosClassificar: data.reqs });
+            this.setState({ requisitosClassificar: data.reqs })
         });
+
+        for (let i = 0; i < _ordemJogada.length; i++) {
+            const element = _ordemJogada[i];
+            if (element['vez'])
+                this.setState({ vez: element['nickname'] })
+        }
+
         BackHandler.addEventListener('hardwareBackPress', this.handleBackButtonClick);
     }
 
@@ -130,18 +133,30 @@ export default class Game extends Component {
     }
 
     handleBackButtonClick() {
-        return false;
+        return true;
     }
 
     mudarVez(vez) {
         for (let i = 0; i < this.state.ordemJogada.length; i++) {
             const element = this.state.ordemJogada[i];
-            if (vez == element && i == (this.state.ordemJogada.length - 1)) {
-                this.setState({ vez: this.state.ordemJogada[0] })
-            } else if (vez == element) {
-                this.setState({ vez: this.state.ordemJogada[i + 1] })
+            if (vez == element['nickname'] && i == (this.state.ordemJogada.length - 1)) {
+
+                firebase.db.ref('rooms/' + this.state.sala.name + '/ordemDeJogada/' + i).update({ vez: false })
+
+                const j = 0
+                firebase.db.ref('rooms/' + this.state.sala.name + '/ordemDeJogada/' + j).update({ vez: true })
+
+                this.setState({ vez: this.state.ordemJogada[0]['nickname'] })
+            } else if (vez == element['nickname']) {
+                firebase.db.ref('rooms/' + this.state.sala.name + '/ordemDeJogada/' + i).update({ vez: false })
+
+                const j = i + 1
+                firebase.db.ref('rooms/' + this.state.sala.name + '/ordemDeJogada/' + j).update({ vez: true })
+
+                this.setState({ vez: this.state.ordemJogada[j]['nickname'] })
             }
         }
+        this.setState({ bonus: false })
     }
 
     classificarRequisito(requisito, tipo, user) {
@@ -151,13 +166,7 @@ export default class Game extends Component {
         if (_tipo == tipo) {
             this.editarRequisitos(_requisito)
             this.pontuacao(user)
-            this.props.route.navigation.navigate('Bonus', {
-                vez: this.state.vez,
-                mudarVez: this.mudarVez.bind(this),
-                sala: this.state.sala,
-                user: this.state.user
-            })
-
+            this.setState({ bonus: true })
         } else {
             Alert.alert('VOCÊ ERROU!');
             this.mudarVez(this.state.vez)
@@ -185,18 +194,41 @@ export default class Game extends Component {
 
         return (
             <View style={styles.container}>
-                <Item
-                    reqs={requisitosClassificar}
-                    sala={sala}
-                    tipos={tipos}
-                    user={user}
-                    navigation={this.props.navigation}
-                    vez={vez}
-                    mudarVez={this.mudarVez.bind(this)}
-                    classificarRequisito={this.classificarRequisito.bind(this)}
-                    bonus={bonus}
-                ></Item>
+                            {!bonus &&
+                    <Item
+                        reqs={requisitosClassificar}
+                        sala={sala}
+                        tipos={tipos}
+                        user={user}
+                        navigation={this.props.navigation}
+                        vez={vez}
+                        mudarVez={this.mudarVez.bind(this)}
+                        classificarRequisito={this.classificarRequisito.bind(this)}
+                    ></Item>
+                }
+
+                {bonus &&
+                    <>
+                        <View style={styles.containerImagem}>
+                            <Image source={require('./carta-verso.png')} style={styles.imagem}></Image>
+                        </View>
+                        <Button
+                            color='#1785C1'
+                            title='BONUS'
+                            onPress={
+                                () =>
+                                    this.props.navigation.navigate('Bonus', {
+                                        vez: this.state.vez,
+                                        mudarVez: this.mudarVez.bind(this),
+                                        sala: this.state.sala,
+                                        user: this.state.user
+                                    })
+                            }
+                        />
+                    </>
+                }
             </View>
+
         )
     }
 
@@ -210,47 +242,24 @@ const styles = StyleSheet.create({
         backgroundColor: '#feddc7',
     },
 
-    containerBTN: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        marginTop: 15
-    },
-
     imagem: {
-        width: '95%',
-        height: 495,
+        width: '100%',
+        height: '70%',
     },
 
     containerImagem: {
-        alignItems: 'center',
-        justifyContent: 'center',
+        height: '100%',
+        alignItems: 'stretch',
+        justifyContent: 'space-around',
     },
 
-    buttonClassificar: {
-        width: 'auto',
-        margin: 10,
-    },
-
-    buttonAjuda: {
-        width: 'auto',
-        margin: 10,
-    },
-
-    buttonText: {
-        padding: 10,
-        color: 'white',
-        fontSize: 15,
-    },
-
-    time: {
+    textRanking: {
         color: 'black',
         fontSize: 20,
         fontWeight: 'bold',
-        marginBottom: 15,
-        backgroundColor: 'white',
-        padding: 2,
-        borderRadius: 5,
-        marginTop: 5
-    }
+    },
+
+    containerRanking: {
+        alignItems: 'center',
+    },
 })

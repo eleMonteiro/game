@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import { Text, Button, Image, View, StyleSheet, ActivityIndicator, Alert } from "react-native";
 import { TouchableOpacity } from "react-native-gesture-handler";
 
-import { BackHandler } from 'react-native';
+import { BackHandler, ToastAndroid } from 'react-native';
 
 import * as firebase from '../../api/firebase'
 
@@ -18,8 +18,6 @@ export default class Initial extends Component {
             tipos: null,
             bonus: null
         }
-
-        this.handleBackButtonClick = this.handleBackButtonClick.bind(this);
     }
 
     componentDidMount() {
@@ -34,9 +32,9 @@ export default class Initial extends Component {
     }
 
     handleBackButtonClick() {
-        return false;
+        return true;
     }
-    
+
     getUser() {
         var userId = firebase.auth.currentUser.uid;
 
@@ -95,105 +93,113 @@ export default class Initial extends Component {
 
         return (
             <View style={styles.container}>
-                <Image source={require('../home/LOGO-3.1-LARANJA.png')} style={styles.imagem} />
+                <View style={styles.containerImagem}>
+                    <Image source={require('../home/LOGO-3.1-LARANJA.png')} style={styles.imagem} />
 
-                <ActivityIndicator animating={this.state.players < 3} size="small" color="#FA7921" />
-                {players < 3 && <Text style={styles.loading}>ESPERANDO JOGADORES</Text>}
+                    <ActivityIndicator animating={this.state.players < 3} size="small" color="#FA7921" />
+                    {players < 3 && <Text style={styles.loading}>ESPERANDO JOGADORES</Text>}
 
-                <View style={styles.containerBTN}>
-                    {
-                        players == 1 && !sala.reqs &&
-                        <>
-                            <Text style={styles.projeto}>ESCOLHA O PROJETO QUE QUER QUE SUA EQUIPETRABALHE.</Text>
+                    <View style={styles.containerBTN}>
+                        {
+                            players == 1 && !sala.reqs &&
+                            <>
+                                <Text style={styles.projeto}>ESCOLHA O PROJETO QUE QUER QUE SUA EQUIPETRABALHE.</Text>
+                                <Button
+                                    color='#FA7921'
+                                    title="GREATOUR"
+                                    onPress={
+                                        () => Alert.alert(
+                                            "GREATOUR",
+                                            "É um aplicativo desenvolvido no Great para apoiar os visitantes do laboratório, que funciona como um guia móvel de visita. Mostra ao usuário sua localização, as salas, informações da sala, descrição dos funcionários ou pesquisadores e o acompanha em tempo real pelo seu tour de visita no laboratório.",
+                                            [
+                                                {
+                                                    text: "Cancel",
+                                                    onPress: () => console.log("Cancel Pressed"),
+                                                    style: "cancel"
+                                                },
+                                                { text: "OK", onPress: () => this.getSala('GREATOUR') }
+                                            ],
+                                            { cancelable: false }
+                                        )
+                                    }
+                                />
+
+                                <Button
+                                    color='#FA7921'
+                                    title="GREAT PRINT"
+                                    onPress={
+                                        () => Alert.alert(
+                                            "GREAT PRINT",
+                                            "É uma aplicação que foi desenvolvida para apoiar a impressão de documentos no Great, para os funcionários dos diversos setores, como do financeiro. Com esse aplicativo os membros do Great também podem imprimir a partir de seus smartphones e essa impressão deve ser feita na impressora mais próxima do usuário requisitante.",
+                                            [
+                                                {
+                                                    text: "Cancel",
+                                                    onPress: () => console.log("Cancel Pressed"),
+                                                    stSyle: "cancel"
+                                                },
+                                                { text: "OK", onPress: () => this.getSala('GREATPRINT') }
+                                            ],
+                                            { cancelable: false }
+                                        )
+                                    }
+                                />
+
+                                <Button
+                                    color='#FA7921'
+                                    title="ADOTE"
+                                    onPress={
+                                        () => Alert.alert(
+                                            "ADOTE",
+                                            "É um sistema para apoiar o cuidado e adoção de animais. Centraliza as burocracias de adoção entre quem cuida dos animais resgatados e quem adota, como também quem ajuda com os custos dos cuidados.",
+                                            [
+                                                {
+                                                    text: "Cancel",
+                                                    onPress: () => console.log("Cancel Pressed"),
+                                                    stSyle: "cancel"
+                                                },
+                                                { text: "OK", onPress: () => this.getSala('ADOTE') }
+                                            ],
+                                            { cancelable: false }
+                                        )
+                                    }
+                                />
+
+                                <Button
+                                    color='#FA7921'
+                                    title="CAFETERIA"
+                                    onPress={
+                                        () => Alert.alert(
+                                            "CAFETERIA",
+                                            "É um sistema retirado do livro base da disciplina de Requisitos de Software. Serve para apoiar os funcionários de uma empresa gerenciando seus pedidos de comida.",
+                                            [
+                                                {
+                                                    text: "Cancel",
+                                                    onPress: () => console.log("Cancel Pressed"),
+                                                    stSyle: "cancel"
+                                                },
+                                                { text: "OK", onPress: () => this.getSala('CAFETERIA') }
+                                            ],
+                                            { cancelable: false }
+                                        )}
+                                />
+                            </>
+                        }
+                        {
+                            players >= 3 &&
                             <Button
                                 color='#FA7921'
-                                title="GREATOUR"
+                                title='INICIAR'
                                 onPress={
-                                    () => Alert.alert(
-                                        "GREATOUR",
-                                        "É um aplicativo desenvolvido no Great para apoiar os visitantes do laboratório, que funciona como um guia móvel de visita. Mostra ao usuário sua localização, as salas, informações da sala, descrição dos funcionários ou pesquisadores e o acompanha em tempo real pelo seu tour de visita no laboratório.",
-                                        [
-                                            {
-                                                text: "Cancel",
-                                                onPress: () => console.log("Cancel Pressed"),
-                                                style: "cancel"
-                                            },
-                                            { text: "OK", onPress: () => this.getSala('GREATOUR') }
-                                        ],
-                                        { cancelable: false }
+                                    () => this.props.navigation.navigate('Game', {
+                                        sala: sala,
+                                        user: user,
+                                        tipos: tipos
+                                    }
                                     )
                                 }
                             />
-
-                            <Button
-                                color='#FA7921'
-                                title="GREAT PRINT"
-                                onPress={
-                                    () => Alert.alert(
-                                        "GREAT PRINT",
-                                        "É uma aplicação que foi desenvolvida para apoiar a impressão de documentos no Great, para os funcionários dos diversos setores, como do financeiro. Com esse aplicativo os membros do Great também podem imprimir a partir de seus smartphones e essa impressão deve ser feita na impressora mais próxima do usuário requisitante.",
-                                        [
-                                            {
-                                                text: "Cancel",
-                                                onPress: () => console.log("Cancel Pressed"),
-                                                stSyle: "cancel"
-                                            },
-                                            { text: "OK", onPress: () => this.getSala('GREATPRINT') }
-                                        ],
-                                        { cancelable: false }
-                                    )
-                                }
-                            />
-
-                            <Button
-                                color='#FA7921'
-                                title="ADOTE"
-                                onPress={
-                                    () => Alert.alert(
-                                        "ADOTE",
-                                        "É um sistema para apoiar o cuidado e adoção de animais. Centraliza as burocracias de adoção entre quem cuida dos animais resgatados e quem adota, como também quem ajuda com os custos dos cuidados.",
-                                        [
-                                            {
-                                                text: "Cancel",
-                                                onPress: () => console.log("Cancel Pressed"),
-                                                stSyle: "cancel"
-                                            },
-                                            { text: "OK", onPress: () => this.getSala('ADOTE') }
-                                        ],
-                                        { cancelable: false }
-                                    )
-                                }
-                            />
-
-                            <Button
-                                color='#FA7921'
-                                title="CAFETERIA"
-                                onPress={
-                                    () => Alert.alert(
-                                        "CAFETERIA",
-                                        "É um sistema retirado do livro base da disciplina de Requisitos de Software. Serve para apoiar os funcionários de uma empresa gerenciando seus pedidos de comida.",
-                                        [
-                                            {
-                                                text: "Cancel",
-                                                onPress: () => console.log("Cancel Pressed"),
-                                                stSyle: "cancel"
-                                            },
-                                            { text: "OK", onPress: () => this.getSala('CAFETERIA') }
-                                        ],
-                                        { cancelable: false }
-                                    )}
-                            />
-                        </>
-                    }
-                    {
-                        players >= 3 &&
-                        <TouchableOpacity
-                            onPress={() => this.props.navigation.navigate('Game', { sala: sala, user: user, tipos: tipos })}>
-                            <View style={styles.button}>
-                                <Text style={styles.buttonText}>INICIAR</Text>
-                            </View>
-                        </TouchableOpacity>
-                    }
+                        }
+                    </View>
                 </View>
             </View>
         )
@@ -204,9 +210,20 @@ export default class Initial extends Component {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        alignItems: 'center',
-        justifyContent: 'center',
+        alignItems: 'stretch',
+        justifyContent: 'space-around',
         backgroundColor: '#feddc7',
+    },
+
+    containerImagem: {
+        height: 'auto',
+        alignItems: 'center',
+        justifyContent: 'space-evenly',
+    },
+
+    imagem: {
+        width: '100%',
+        height: '80%',
     },
 
     containerBTN: {

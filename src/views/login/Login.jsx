@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { Text, TextInput, Image, View, StyleSheet, Alert, ActivityIndicator } from "react-native";
+import { Text, TextInput, Image, View, StyleSheet, Alert, ActivityIndicator, Button } from "react-native";
 import { TouchableOpacity } from "react-native-gesture-handler";
 
 import * as firebase from '../../api/firebase'
@@ -28,82 +28,80 @@ export default class Login extends Component {
     render() {
         return (
             <View style={styles.container}>
-                <Image source={require('../home/LOGO-3.1-LARANJA.png')} style={styles.imagem} />
+                <View style={styles.containerImagem}>
 
-                <ActivityIndicator animating={this.state.loading} size="small" color="#FA7921" />
+                    <Image source={require('../home/LOGO-3.1-LARANJA.png')} style={styles.imagem} />
 
-                
-                <TextInput
-                    style={styles.textInput}
-                    onChangeText={(email) => this.setState({ email })}
-                    placeholder="Email"
-                    textContentType="emailAddress"
-                />
+                    <ActivityIndicator animating={this.state.loading} size="small" color="#FA7921" />
 
-                <TextInput
-                    style={styles.textInput}
-                    onChangeText={(password) => this.setState({ password })}
-                    placeholder="Senha"
-                    textContentType="password"
-                    type="password"
-                    secureTextEntry={true}
-                />
 
-                <View style={styles.containerBTN}>
-                    <TouchableOpacity
-                        onPress={() => {
-                            this.setState({ loading: true })
-                            this.login()
-                        }}>
-                        <View style={styles.button}>
-                            <Text style={styles.buttonText}>ENTRAR</Text>
-                        </View>
-                    </TouchableOpacity>
+                    <TextInput
+                        style={styles.textInput}
+                        onChangeText={(email) => this.setState({ email })}
+                        placeholder="Email"
+                        textContentType="emailAddress"
+                    />
 
-                    <TouchableOpacity
-                        onPress={() => this.props.navigation.navigate('Classifiqui')}>
-                        <View style={styles.button}>
-                            <Text style={styles.buttonText}>CANCELAR</Text>
-                        </View>
-                    </TouchableOpacity>
+                    <TextInput
+                        style={styles.textInput}
+                        onChangeText={(password) => this.setState({ password })}
+                        placeholder="Senha"
+                        textContentType="password"
+                        type="password"
+                        secureTextEntry={true}
+                    />
+
+                    <View style={styles.containerBTN}>
+                        <Button
+                            color='#FA7921'
+                            title='ENTRAR'
+                            onPress={
+                                () => {
+                                    this.setState({ loading: true })
+                                    this.login()
+                                }
+                            }
+                        />
+
+                        <View style={{ margin: 10 }}></View>
+
+                        <Button
+                            color='#FA7921'
+                            title='CANCELAR'
+                            onPress={
+                                () => this.props.navigation.navigate('Classifiqui')
+                            }
+                        />
+                    </View>
                 </View>
             </View>
         )
     }
-
 }
 
 const styles = StyleSheet.create({
     container: {
-        flex: 2,
-        alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor: '#feddc7'
+        flex: 1,
+        alignItems: 'stretch',
+        justifyContent: 'space-around',
+        backgroundColor: '#feddc7',
     },
 
     containerBTN: {
-        flexDirection: 'row',
-        alignItems: 'baseline',
+        width: "80%",
+        alignItems: 'stretch',
+    },
+
+    containerImagem: {
+        height: 'auto',
+        alignItems: 'center',
         justifyContent: 'space-around',
-        flexWrap: 'wrap',
+        padding: 5
     },
 
     imagem: {
-        width: 100,
-        height: 200,
-    },
-
-    button: {
-        width: 'auto',
-        alignItems: 'center',
-        backgroundColor: '#FA7921',
-        margin: 10
-    },
-
-    buttonText: {
-        padding: 10,
-        color: 'white',
-        fontSize: 15
+        width: '40%',
+        height: '40%',
     },
 
     textInput: {
@@ -112,7 +110,6 @@ const styles = StyleSheet.create({
         borderColor: "#fa7921",
         borderWidth: 2,
         paddingLeft: 20,
-        color: '#111111',
-        margin: 10
+        color: '#111111'
     },
 })

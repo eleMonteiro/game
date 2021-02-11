@@ -56,22 +56,22 @@ export default class BonusScreen extends Component {
 
             if (filho == 5) {
                 firebase.db.ref('rooms/' + sala.name + '/players/' + _user)
-                    .update({ pontuacao: player.pontuacao + 1})
+                    .update({ pontuacao: player.pontuacao + 1 })
             }
 
             if (filho == 6 || filho == 7) {
                 firebase.db.ref('rooms/' + sala.name + '/players/' + _user)
-                    .update({ pontuacao: player.pontuacao + 2})
+                    .update({ pontuacao: player.pontuacao + 2 })
             }
 
             if (filho == 10 || filho == 8) {
                 firebase.db.ref('rooms/' + sala.name + '/players/' + _user)
-                    .update({ pontuacao: player.pontuacao + 3})
+                    .update({ pontuacao: player.pontuacao + 3 })
             }
 
             if (filho == 10) {
                 firebase.db.ref('rooms/' + sala.name + '/players/' + _user)
-                    .update({ pontuacao: player.pontuacao + 1})
+                    .update({ pontuacao: player.pontuacao + 1 })
             }
         }
 
@@ -83,29 +83,28 @@ export default class BonusScreen extends Component {
     }
 
     handleBackButtonClick() {
-        return false;
+        return true;
     }
 
     render() {
         const { bonus } = this.state
         return (
-            <View style={{ flex: 1, justifyContent: 'space-around', alignItems: 'center', backgroundColor: '#feddc7' }}>
+            <View style={styles.container}>
                 {
                     bonus &&
-                    <>
+                    <View style={styles.containerImagem}>
                         <Image source={{ uri: bonus['url'] }} style={styles.imagem} />
-
                         <Button
                             color='#1785C1'
                             title='VOLTAR'
                             onPress={
                                 () => {
-                                    this.props.route.params.tipos.mudarVez(this.props.route.params.vez)
+                                    this.props.route.params.mudarVez(this.props.route.params.vez)
                                     this.props.navigation.goBack()
                                 }
                             }
                         />
-                    </>
+                    </View>
                 }
             </View>
         )
@@ -120,29 +119,15 @@ const styles = StyleSheet.create({
         backgroundColor: '#feddc7',
     },
 
-    containerBTN: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
+    containerImagem: {
+        height: '100%',
+        alignItems: 'stretch',
+        justifyContent: 'space-around',
+        padding: 5
     },
 
     imagem: {
-        width: 400,
-        height: 500,
-    },
-
-    button: {
-        marginBottom: 30,
-        width: 'auto',
-        alignItems: 'center',
-        backgroundColor: '#FA7921',
-        borderRadius: 10,
-        margin: 15
-    },
-
-    buttonText: {
-        padding: 10,
-        color: 'white',
-        fontSize: 15
+        width: '100%',
+        height: '80%',
     },
 })

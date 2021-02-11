@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { Text, TextInput, Image, View, StyleSheet, Alert, ActivityIndicator } from "react-native";
+import { Text, TextInput, Image, View, StyleSheet, Alert, ActivityIndicator, Button } from "react-native";
 import { TouchableOpacity } from "react-native-gesture-handler";
 
 import * as firebase from '../../api/firebase'
@@ -40,53 +40,55 @@ export default class CriarConta extends Component {
     render() {
         return (
             <View style={styles.container}>
-                <Image source={require('../home/LOGO-3.1-LARANJA.png')} style={styles.imagem} />
+                <View style={styles.containerImagem}>
+                    <Image source={require('../home/LOGO-3.1-LARANJA.png')} style={styles.imagem} />
 
-                <ActivityIndicator animating={this.state.loading} size="small" color="#FA7921" />
+                    <ActivityIndicator animating={this.state.loading} size="small" color="#FA7921" />
 
-                <TextInput
-                    style={styles.textInput}
-                    onChangeText={(nome) => this.setState({ nome })}
-                    placeholder="Nickname"
-                    textContentType="nickname"
-                />
+                    <TextInput
+                        style={styles.textInput}
+                        onChangeText={(nome) => this.setState({ nome })}
+                        placeholder="Nickname"
+                        textContentType="nickname"
+                    />
 
-                <TextInput
-                    style={styles.textInput}
-                    onChangeText={(email) => this.setState({ email })}
-                    placeholder="Email"
-                    textContentType="emailAddress"
-                />
+                    <TextInput
+                        style={styles.textInput}
+                        onChangeText={(email) => this.setState({ email })}
+                        placeholder="Email"
+                        textContentType="emailAddress"
+                    />
 
-                <TextInput
-                    style={styles.textInput}
-                    onChangeText={(password) => this.setState({ password })}
-                    placeholder="Senha"
-                    textContentType="password"
-                    secureTextEntry={true}
-                />
+                    <TextInput
+                        style={styles.textInput}
+                        onChangeText={(password) => this.setState({ password })}
+                        placeholder="Senha"
+                        textContentType="password"
+                        secureTextEntry={true}
+                    />
 
-                <View style={styles.containerBTN}>
-                    <TouchableOpacity
-                        onPress={
-                            () => {
-                                this.setState({ loading: true })
-                                this.criarConta()
+                    <View style={styles.containerBTN}>
+                        <Button
+                            color='#FA7921'
+                            title='CRIAR'
+                            onPress={
+                                () => {
+                                    this.setState({ loading: true })
+                                    this.criarConta()
+                                }
                             }
-                        }>
-                        <View style={styles.button}>
-                            <Text style={styles.buttonText}>CRIAR</Text>
-                        </View>
-                    </TouchableOpacity>
-
-                    <TouchableOpacity
-                        onPress={() => this.props.navigation.navigate('Classifiqui')}>
-                        <View style={styles.button}>
-                            <Text style={styles.buttonText}>CANCELAR</Text>
-                        </View>
-                    </TouchableOpacity>
+                        />
+                        <View style={{ margin: 10 }}></View>
+                        <Button
+                            color='#FA7921'
+                            title='CANCELAR'
+                            onPress={
+                                () => this.props.navigation.navigate('Classifiqui')
+                            }
+                        />
+                    </View>
                 </View>
-            </View>
+            </View >
         )
     }
 
@@ -95,33 +97,26 @@ export default class CriarConta extends Component {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor: '#feddc7'
+        alignItems: 'stretch',
+        justifyContent: 'space-around',
+        backgroundColor: '#feddc7',
     },
 
     containerBTN: {
-        flexDirection: 'row',
+        width: "80%",
+        alignItems: 'stretch',
+    },
+
+    containerImagem: {
+        height: 'auto',
         alignItems: 'center',
-        justifyContent: 'center',
+        justifyContent: 'space-around',
+        padding: 5
     },
 
     imagem: {
-        width: 100,
-        height: 200,
-    },
-
-    button: {
-        width: 'auto',
-        alignItems: 'center',
-        backgroundColor: '#FA7921',
-        margin: 10
-    },
-
-    buttonText: {
-        padding: 10,
-        color: 'white',
-        fontSize: 15
+        width: '40%',
+        height: '40%',
     },
 
     textInput: {
@@ -130,7 +125,6 @@ const styles = StyleSheet.create({
         borderColor: "#fa7921",
         borderWidth: 2,
         paddingLeft: 20,
-        margin: 10,
         color: '#111111'
     },
 })

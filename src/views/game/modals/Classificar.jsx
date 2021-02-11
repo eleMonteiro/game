@@ -5,7 +5,7 @@ import { Alert, Button, Image, StyleSheet, Text, View } from 'react-native'
 import { BackHandler } from 'react-native';
 
 const Item = ({ user, tipo, title, url, classificarRequisito, req, navigation }) => (
-    <View>
+    <View style={styles.card}>
         <Image source={{ uri: url }} style={styles.imagem}></Image>
         <Button
             title='CLASSIFICAR'
@@ -58,7 +58,7 @@ export default class ModalClassificar extends Component {
     }
 
     handleBackButtonClick() {
-        return false;
+        return true;
     }
 
     renderCard = (card) => {
@@ -82,6 +82,8 @@ export default class ModalClassificar extends Component {
     };
 
     render() {
+        const margin =  'oii'
+
         return (
             <View style={styles.container}>
                 <Swiper
@@ -97,8 +99,7 @@ export default class ModalClassificar extends Component {
                     onTapCard={() => { }}
                     cards={this.state.cards}
                     cardIndex={this.state.cardIndex}
-                    cardVerticalMargin={80}
-                    renderCard={this.renderCard}
+                   renderCard={this.renderCard}
                     onSwipedAll={this.onSwipedAllCards}
                     stackSize={3}
                     stackSeparation={15}
@@ -106,7 +107,7 @@ export default class ModalClassificar extends Component {
                     animateCardOpacity
                     swipeBackCard
                 >
-                    <Button onPress={() => this.swiper.swipeBack()} color='#1785C1' title='VOLTAR CARTA' />
+                    <Button onPress={() => this.swiper.swipeBack()} color='#1785C1' title='VOLTAR CARTAS' />
 
                 </Swiper>
             </View>
@@ -117,30 +118,24 @@ export default class ModalClassificar extends Component {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        justifyContent: 'space-around',
+        justifyContent: 'center',
         alignItems: 'stretch',
         backgroundColor: '#feddc7',
     },
 
     cardContainer: {
         flex: 1,
-        alignItems: 'stretch',
-        justifyContent: 'space-around',
         backgroundColor: '#feddc7',
     },
 
     card: {
-        width: '100%',
-        height: '100%',
-        borderRadius: 5,
-
         justifyContent: 'center',
-        alignItems: 'center',
+        alignItems: 'stretch',
     },
 
     imagem: {
-        width: '100%',
-        height: 500,
+        width: '95%',
+        height: '80%',
     },
 
 })

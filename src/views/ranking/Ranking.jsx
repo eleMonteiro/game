@@ -38,7 +38,7 @@ export default class Ranking extends Component {
     }
 
     handleBackButtonClick() {
-        return false;
+        return true;
     }
     
 

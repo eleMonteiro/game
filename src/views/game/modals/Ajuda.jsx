@@ -93,18 +93,18 @@ export default class AjudaScreen extends Component {
         BackHandler.addEventListener('hardwareBackPress', this.handleBackButtonClick);
     }
 
-    componentWillUnmount(){
+    componentWillUnmount() {
         BackHandler.removeEventListener('hardwareBackPress', this.handleBackButtonClick);
     }
 
     handleBackButtonClick() {
-        return false;
+        return true;
     }
 
     usarAnalista() {
         const sala = this.state.sala
         const user = this.state.user.nickname
-        const player = this.state.sala.players
+        const player = this.state.sala.players[user]
 
         firebase.db.ref('rooms/' + sala.name + '/players/' + user).update({ ajudasAnalista: player.ajudasAnalista - 1 })
 
@@ -129,13 +129,7 @@ export default class AjudaScreen extends Component {
                     style: "cancel"
                 },
                 {
-                    text: "OK", onPress: () =>
-                        this.props.navigation.navigate('Classificar', {
-                            tipos: this.state.tipos,
-                            req: this.state.req,
-                            user: this.state.user,
-                            classificarRequisito: this.props.route.params.classificarRequisito
-                        })
+                    text: "OK", onPress: () => this.props.navigation.goBack()
                 }
             ],
             { cancelable: false }
@@ -147,14 +141,14 @@ export default class AjudaScreen extends Component {
     usarProgramador() {
         const sala = this.state.sala
         const user = this.state.user.nickname
-        const player = this.state.sala.players
+        const player = this.state.sala.players[user]
 
         firebase.db.ref('rooms/' + sala.name + '/players/' + user).update({ ajudasProgramador: player.ajudasProgramador - 1 })
 
         const req = this.state.req['tipo']
 
         const filho = []
-        while (numeros.length < 3) {
+        while (filho.length < 3) {
             var aleatorio = Math.floor(Math.random() * 10)
             if (filho.indexOf(aleatorio) == -1 && req != tipos[aleatorio].tipo)
                 filho.push(aleatorio);
@@ -189,64 +183,59 @@ export default class AjudaScreen extends Component {
                     onPress: () => console.log("Cancel Pressed"),
                     style: "cancel"
                 },
-                { text: "OK", onPress: () => this.props.navigation.navigate('Classificar', { tipos: this.state.tipos, req: this.state.req, user: this.state.user }) }
+                { text: "OK", onPress: () => this.props.navigation.goBack()}
             ],
             { cancelable: false }
         )
     }
 
     render() {
-        const { analista, programador, player, ajudas } = this.state
+        const { analista, programador, player } = this.state
 
         return (
-            <View style={styles.container}>
-                <CardFlip style={styles.cardContainer} ref={card => (this.card = card)}>
-                    <TouchableOpacity
-                        activeOpacity={1}
-                        style={[styles.card]}
-                        onPress={() => this.card.flip()}>
-                        {
-                            analista && player.ajudasAnalista >= 1 &&
+            <CardFlip style={styles.container} ref={card => (this.card = card)}>
+                <TouchableOpacity
+                    activeOpacity={1}
+                    style={styles.containerImagem}
+                    onPress={() => this.card.flip()}>
+                    {
+                        analista &&
+                        <>
                             <Image source={{ uri: analista['url'] }} style={styles.imagem} />
-                        }
-                        {
-                            analista && player.ajudasAnalista >= 1 &&
-                            <View style={styles.button}>
-                                <Text style={styles.text}>Ajudas Restantes: {player.ajudasAnalista}</Text>
+                            <Text style={styles.text}>Ajudas Restantes: {player.ajudasAnalista}</Text>
+                        </>
+                    }
+                    {
+                        analista && player.ajudasAnalista >= 1 &&
+                        <Button
+                            color='#0D7A18'
+                            title='USAR AJUDA'
+                            onPress={() => this.usarAnalista()}
+                        />
+                    }
+                </TouchableOpacity>
 
-                                <Button
-                                    color='#0D7A18'
-                                    title='USAR AJUDA'
-                                    onPress={() => this.usarAnalista}
-                                />
-
-                            </View>
-                        }
-                    </TouchableOpacity>
-
-                    <TouchableOpacity
-                        activeOpacity={1}
-                        style={[styles.card]}
-                        onPress={() => this.card.flip()}>
-                        {
-                            programador && player.ajudasProgramador >= 1 &&
+                <TouchableOpacity
+                    activeOpacity={1}
+                    style={styles.containerImagem}
+                    onPress={() => this.card.flip()}>
+                    {
+                        programador &&
+                        <>
                             <Image source={{ uri: programador['url'] }} style={styles.imagem} />
-                        }
-                        {
-                            programador && player.ajudasProgramador >= 1 &&
-                            <View style={styles.button}>
-                                <Text style={styles.text}>Ajudas Restantes: {player.ajudasProgramador}</Text>
-
-                                <Button
-                                    color='#0D7A18'
-                                    title='USAR AJUDA'
-                                    onPress={() => this.usarProgramador}
-                                />
-                            </View>
-                        }
-                    </TouchableOpacity>
-                </CardFlip>
-            </View>
+                            <Text style={styles.text}>Ajudas Restantes: {player.ajudasProgramador}</Text>
+                        </>
+                    }
+                    {
+                        programador && player.ajudasProgramador >= 1 &&
+                        <Button
+                            color='#0D7A18'
+                            title='USAR AJUDA'
+                            onPress={() => this.usarProgramador()}
+                        />
+                    }
+                </TouchableOpacity>
+            </CardFlip>
         )
     }
 }
@@ -254,20 +243,29 @@ export default class AjudaScreen extends Component {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        justifyContent: 'space-around',
+        justifyContent: 'center',
         alignItems: 'stretch',
         backgroundColor: '#feddc7',
     },
 
-    imagem: {
-        width: '100%',
-        height: 500,
+    containerImagem: {
+        height: '100%',
+        alignItems: 'stretch',
+        justifyContent: 'center',
+        padding: 5,
+        shadowColor: 'rgba(0,0,0,0.5)',
+
+        shadowOffset: {
+            width: 0,
+            height: 1,
+        },
+
+        shadowOpacity: 0.5,
     },
 
-    button: {
-        width: 'auto',
-        alignItems: 'stretch',
-        margin: 30,
+    imagem: {
+        width: '100%',
+        height: '80%',
     },
 
     text: {
@@ -279,29 +277,5 @@ const styles = StyleSheet.create({
         borderRadius: 5,
         marginTop: 5,
         textAlign: 'center'
-    },
-
-    cardContainer: {
-        flex: 1,
-        padding: 20,
-    },
-
-    card: {
-        width: '100%',
-        height: '100%',
-        borderRadius: 5,
-
-        justifyContent: 'center',
-        alignItems: 'center',
-
-
-        shadowColor: 'rgba(0,0,0,0.5)',
-
-        shadowOffset: {
-            width: 0,
-            height: 1,
-        },
-
-        shadowOpacity: 0.5,
     },
 })
