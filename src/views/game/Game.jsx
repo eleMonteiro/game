@@ -5,6 +5,20 @@ import * as firebase from '../../api/firebase'
 
 import { BackHandler } from 'react-native';
 
+function shuffle(array) {
+    var currentIndex = array.length, temporaryValue, randomIndex;
+
+    while (0 !== currentIndex) {
+        randomIndex = Math.floor(Math.random() * currentIndex);
+        currentIndex -= 1;
+        temporaryValue = array[currentIndex];
+        array[currentIndex] = array[randomIndex];
+        array[randomIndex] = temporaryValue;
+    }
+
+    return array;
+}
+
 function Item(props) {
     var requisitos = props.reqs
     var reqs = []
@@ -13,8 +27,10 @@ function Item(props) {
         reqs.push(value);
     }
 
-    for (let i = 0; i < reqs.length; i++) {
-        const element = reqs[i];
+    var _reqs = shuffle(reqs)
+
+    for (let i = 0; i < _reqs.length; i++) {
+        const element = _reqs[i];
         if (element['classificada'] == false) return (
             <View style={styles.containerImagem}>
                 <Image
@@ -66,7 +82,7 @@ function Item(props) {
 
     return (
         <>
-            <View style={styles.containerImagem}>
+            <View style={styles.containerImagemColor}>
                 <Image source={require('./carta-verso.png')} style={styles.imagem}></Image>
                 <Button
                     color='#1785C1'
@@ -177,7 +193,7 @@ export default class Game extends Component {
         const sala = this.state.sala
         var player
 
-        const bonusRef = firebase.db.ref('rooms/'+sala.name+'/players').child(user);
+        const bonusRef = firebase.db.ref('rooms/' + sala.name + '/players').child(user);
         bonusRef.on('value', (snapshot) => {
             player = snapshot.val()
         })
@@ -208,7 +224,7 @@ export default class Game extends Component {
 
                 {bonus &&
                     <>
-                        <View style={styles.containerImagem}>
+                        <View style={styles.containerImagemColor}>
                             <Image source={require('./carta-verso.png')} style={styles.imagem}></Image>
                             <Button
                                 color='#1785C1'
@@ -247,6 +263,12 @@ const styles = StyleSheet.create({
     },
 
     containerImagem: {
+        height: '100%',
+        alignItems: 'stretch',
+        justifyContent: 'space-around',
+    },
+
+    containerImagemColor: {
         height: '100%',
         alignItems: 'stretch',
         justifyContent: 'space-around',
