@@ -17,9 +17,6 @@ function Item(props) {
         const element = reqs[i];
         if (element['classificada'] == false) return (
             <View style={styles.containerImagem}>
-                <View style={styles.containerRanking}>
-                    <Text style={styles.textRanking}>JOGADOR: <Text style={{ color: '#0D7A18' }}>{props.vez}</Text></Text>
-                </View>
                 <Image
                     source={{ uri: element['url'] }}
                     style={styles.imagem}
@@ -71,15 +68,12 @@ function Item(props) {
         <>
             <View style={styles.containerImagem}>
                 <Image source={require('./carta-verso.png')} style={styles.imagem}></Image>
-            </View>
-
-            <View style={styles.containerBTN}>
                 <Button
                     color='#1785C1'
                     title='RANKING'
                     onPress={
                         () =>
-                            props.navigation.navigate('Ranking', { players: props.sala.players })
+                            props.navigation.navigate('Ranking', { sala: props.sala.name })
                     }
                 />
             </View>
@@ -116,14 +110,9 @@ export default class Game extends Component {
             _ordemJogada = data.ordemDeJogada
 
             this.setState({ ordemJogada: data.ordemDeJogada })
+            this.setState({ vez: data.vez })
             this.setState({ requisitosClassificar: data.reqs })
         });
-
-        for (let i = 0; i < _ordemJogada.length; i++) {
-            const element = _ordemJogada[i];
-            if (element['vez'])
-                this.setState({ vez: element['nickname'] })
-        }
 
         BackHandler.addEventListener('hardwareBackPress', this.handleBackButtonClick);
     }
@@ -145,15 +134,21 @@ export default class Game extends Component {
 
                 const j = 0
                 firebase.db.ref('rooms/' + this.state.sala.name + '/ordemDeJogada/' + j).update({ vez: true })
+                firebase.db.ref('rooms/' + this.state.sala.name).update({ vez: this.state.ordemJogada[0]['nickname'] })
 
-                this.setState({ vez: this.state.ordemJogada[0]['nickname'] })
             } else if (vez == element['nickname']) {
                 firebase.db.ref('rooms/' + this.state.sala.name + '/ordemDeJogada/' + i).update({ vez: false })
 
                 const j = i + 1
-                firebase.db.ref('rooms/' + this.state.sala.name + '/ordemDeJogada/' + j).update({ vez: true })
 
-                this.setState({ vez: this.state.ordemJogada[j]['nickname'] })
+                if (j < this.state.ordemJogada.length) {
+                    console.log('oiiii' + this.state.ordemJogada[j]);
+                    firebase.db.ref('rooms/' + this.state.sala.name + '/ordemDeJogada/' + j).update({ vez: true })
+                    firebase.db.ref('rooms/' + this.state.sala.name).update({ vez: this.state.ordemJogada[j]['nickname'] })
+                } else {
+                    firebase.db.ref('rooms/' + this.state.sala.name + '/ordemDeJogada/' + j).update({ vez: true })
+                    firebase.db.ref('rooms/' + this.state.sala.name).update({ vez: this.state.ordemJogada[0]['nickname'] })
+                }
             }
         }
         this.setState({ bonus: false })
@@ -165,7 +160,7 @@ export default class Game extends Component {
 
         if (_tipo == tipo) {
             this.editarRequisitos(_requisito)
-            this.pontuacao(user)
+            this.pontuacao(this.state.vez)
             this.setState({ bonus: true })
         } else {
             Alert.alert('VOCÊ ERROU!');
@@ -180,10 +175,16 @@ export default class Game extends Component {
 
     pontuacao = (user) => {
         const sala = this.state.sala
-        const _user = user.nickname
-        const player = sala.players[_user]
+        var player
 
-        firebase.db.ref('rooms/' + sala.name + '/players/' + _user)
+        const bonusRef = firebase.db.ref('rooms/'+sala.name+'/players').child(user);
+        bonusRef.on('value', (snapshot) => {
+            player = snapshot.val()
+        })
+
+        console.log(player);
+
+        firebase.db.ref('rooms/' + sala.name + '/players/' + player.nickname)
             .update({ pontuacao: player.pontuacao + 1, requisitosClassificados: player.requisitosClassificados + 1 })
 
     }
@@ -194,7 +195,7 @@ export default class Game extends Component {
 
         return (
             <View style={styles.container}>
-                            {!bonus &&
+                {!bonus &&
                     <Item
                         reqs={requisitosClassificar}
                         sala={sala}
@@ -211,20 +212,20 @@ export default class Game extends Component {
                     <>
                         <View style={styles.containerImagem}>
                             <Image source={require('./carta-verso.png')} style={styles.imagem}></Image>
+                            <Button
+                                color='#1785C1'
+                                title='BONUS'
+                                onPress={
+                                    () =>
+                                        this.props.navigation.navigate('Bonus', {
+                                            vez: this.state.vez,
+                                            mudarVez: this.mudarVez.bind(this),
+                                            sala: this.state.sala,
+                                            user: this.state.user
+                                        })
+                                }
+                            />
                         </View>
-                        <Button
-                            color='#1785C1'
-                            title='BONUS'
-                            onPress={
-                                () =>
-                                    this.props.navigation.navigate('Bonus', {
-                                        vez: this.state.vez,
-                                        mudarVez: this.mudarVez.bind(this),
-                                        sala: this.state.sala,
-                                        user: this.state.user
-                                    })
-                            }
-                        />
                     </>
                 }
             </View>
@@ -244,7 +245,7 @@ const styles = StyleSheet.create({
 
     imagem: {
         width: '100%',
-        height: '70%',
+        height: '80%',
     },
 
     containerImagem: {

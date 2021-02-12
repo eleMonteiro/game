@@ -2,6 +2,8 @@ import React, { Component } from "react";
 import { Text, Image, View, StyleSheet, Button } from "react-native";
 
 import { BackHandler } from 'react-native';
+import { ScrollView } from "react-native-gesture-handler";
+import Divider from "react-native-divider";
 
 import * as firebase from '../../api/firebase'
 
@@ -10,7 +12,6 @@ export default class Ranking extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            players: this.props.route.params.players,
             elementos: []
         }
 
@@ -18,7 +19,13 @@ export default class Ranking extends Component {
     }
 
     componentDidMount() {
-        const obj = this.props.route.params.players
+        const sala = this.props.route.params.sala
+        var obj
+        const playerRef = firebase.db.ref('rooms/' + sala + '/players')
+        playerRef.on('value', (snapshot) => {
+            obj = snapshot.val()
+        })
+
         var elementos = []
 
         for (var i in obj) {
@@ -27,7 +34,7 @@ export default class Ranking extends Component {
             }
         }
 
-        elementos.sort(function (a, b) { return b['pontuacao'] - a['pontuacao'] })
+        elementos.sort(function (a, b) { return b['requisitosClassificados'] - a['requisitosClassificados'] })
 
         this.setState({ elementos: elementos })
         BackHandler.addEventListener('hardwareBackPress', this.handleBackButtonClick);
@@ -40,15 +47,14 @@ export default class Ranking extends Component {
     handleBackButtonClick() {
         return true;
     }
-    
+
 
 
     render() {
         const { elementos } = this.state
 
         return (
-            <View style={styles.container}>
-
+            <ScrollView style={{ backgroundColor: 'white' }}>
                 <View style={styles.containerIMG}>
                     <Image source={require('./ranking.png')} style={styles.imagem} />
                     <Text style={styles.textRanking}>Ranking</Text>
@@ -58,7 +64,26 @@ export default class Ranking extends Component {
                     {
                         elementos.map((item, index) => {
                             return (
-                                <Text style={styles.elementos}>{item['nickname']} - {item['pontuacao']} ponto(s)</Text>
+                                <View style={styles.container}>
+                                    { index == 0 &&
+                                        <>
+                                            <Divider borderColor='#fa7921' color='black' orientation='center'><Text style={styles.elementos}>CAMPEÃO</Text></Divider>
+                                            <Text style={styles.elementos}>{item['nickname']} </Text>
+
+                                            <Text>Pontuação: {item['pontuacao']} ponto(s)</Text>
+                                            <Text>Requisitos Classificados: {item['requisitosClassificados']}</Text>
+                                        </>
+                                    }
+                                    { index > 0 &&
+                                        <>
+                                            <Divider borderColor='#fa7921' color='black' orientation='center'><Text style={styles.elementos}>{index + 1}</Text></Divider>
+                                            <Text style={styles.elementos}>{item['nickname']} </Text>
+
+                                            <Text>Pontuação: {item['pontuacao']} ponto(s)</Text>
+                                            <Text>Requisitos Classificados: {item['requisitosClassificados']}</Text>
+                                        </>
+                                    }
+                                </View>
                             )
                         })
                     }
@@ -66,9 +91,9 @@ export default class Ranking extends Component {
                 <View style={styles.containerBTN}>
                     <Button
                         color='#1785C1'
-                        title='RANKING'
+                        title='LOGOUT'
                         onPress={
-                            () =>{
+                            () => {
                                 firebase.auth.signOut()
                                 this.props.navigation.navigate('Classifiqui')
                             }
@@ -76,7 +101,7 @@ export default class Ranking extends Component {
                         }
                     />
                 </View>
-            </View>
+            </ScrollView>
         )
     }
 
@@ -85,10 +110,11 @@ export default class Ranking extends Component {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        alignItems: 'stretch',
+        alignItems: 'center',
         justifyContent: 'center',
         backgroundColor: 'white',
-        padding: 10
+        padding: 10,
+        width: '100%'
     },
 
     containerIMG: {
@@ -118,7 +144,7 @@ const styles = StyleSheet.create({
         padding: 15
     },
 
-    elementos:{
+    elementos: {
         color: '#fa7921',
         fontSize: 20,
         padding: 2,

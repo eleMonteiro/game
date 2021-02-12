@@ -71,10 +71,10 @@ export default class AjudaScreen extends Component {
 
     componentDidMount() {
         const sala = this.state.sala
-        const user = this.state.user.nickname
-        const player = sala.players[user]
-
-        this.setState({ player: player })
+        const playerRef = firebase.db.ref('rooms/' + sala.name + '/players').child(this.props.route.params.vez);
+        playerRef.on('value', (snapshot) => {
+            this.setState({player: snapshot.val()})
+        })
 
         if (!this.state.analista) {
             const analistaRef = firebase.db.ref('ajudas/').child('0');
@@ -103,8 +103,12 @@ export default class AjudaScreen extends Component {
 
     usarAnalista() {
         const sala = this.state.sala
-        const user = this.state.user.nickname
-        const player = this.state.sala.players[user]
+        
+        var player
+        const playerRef = firebase.db.ref('rooms/' + sala.name + '/players').child(this.props.route.params.vez);
+        playerRef.on('value', (snapshot) => {
+            player = snapshot.val()
+        })
 
         firebase.db.ref('rooms/' + sala.name + '/players/' + user).update({ ajudasAnalista: player.ajudasAnalista - 1 })
 
@@ -140,10 +144,11 @@ export default class AjudaScreen extends Component {
 
     usarProgramador() {
         const sala = this.state.sala
-        const user = this.state.user.nickname
-        const player = this.state.sala.players[user]
-
-        firebase.db.ref('rooms/' + sala.name + '/players/' + user).update({ ajudasProgramador: player.ajudasProgramador - 1 })
+        var player
+        const playerRef = firebase.db.ref('rooms/' + sala.name + '/players').child(this.props.route.params.vez);
+        playerRef.on('value', (snapshot) => {
+            player = snapshot.val()
+        })
 
         const req = this.state.req['tipo']
 
@@ -183,7 +188,7 @@ export default class AjudaScreen extends Component {
                     onPress: () => console.log("Cancel Pressed"),
                     style: "cancel"
                 },
-                { text: "OK", onPress: () => this.props.navigation.goBack()}
+                { text: "OK", onPress: () => this.props.navigation.goBack() }
             ],
             { cancelable: false }
         )

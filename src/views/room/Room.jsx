@@ -74,7 +74,8 @@ export default class Room extends Component {
                     max: 7,
                     min: 3,
                     qtd: 0,
-                    ordemDeJogada: ordem
+                    ordemDeJogada: ordem,
+                    vez: this.state.user.nickname
                 }
 
                 firebase.db.ref('rooms/' + element.name).set(element)

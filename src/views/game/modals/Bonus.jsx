@@ -31,46 +31,49 @@ export default class BonusScreen extends Component {
             })
 
             const sala = this.state.sala
-            const _user = this.state.user.nickname
-            const player = this.state.sala.players[_user]
-
+            var player
+            const playerRef = firebase.db.ref('rooms/'+sala.name+'/players').child(this.props.route.params.vez);
+            playerRef.on('value', (snapshot) => {
+                player = snapshot.val()
+            })
+    
             if (filho == 1 && player.ajudasAnalista < 1) {
-                firebase.db.ref('rooms/' + sala.name + '/players/' + _user)
+                firebase.db.ref('rooms/' + sala.name + '/players/' + player.nickname)
                     .update({ ajudasAnalista: player.ajudasAnalista + 1 })
             }
 
             if (filho == 2 && player.ajudasProgramador < 1) {
-                firebase.db.ref('rooms/' + sala.name + '/players/' + _user)
+                firebase.db.ref('rooms/' + sala.name + '/players/' + player.nickname)
                     .update({ ajudasProgramador: player.ajudasProgramador + 1 })
             }
 
             if (filho == 3) {
-                firebase.db.ref('rooms/' + sala.name + '/players/' + _user)
+                firebase.db.ref('rooms/' + sala.name + '/players/' + player.nickname)
                     .update({ ajudasAnalista: player.ajudasAnalista + 1 })
             }
 
             if (filho == 4 || filho == 9) {
-                firebase.db.ref('rooms/' + sala.name + '/players/' + _user)
+                firebase.db.ref('rooms/' + sala.name + '/players/' + player.nickname)
                     .update({ ajudasProgramador: player.ajudasProgramador + 1 })
             }
 
             if (filho == 5) {
-                firebase.db.ref('rooms/' + sala.name + '/players/' + _user)
+                firebase.db.ref('rooms/' + sala.name + '/players/' + player.nickname)
                     .update({ pontuacao: player.pontuacao + 1 })
             }
 
             if (filho == 6 || filho == 7) {
-                firebase.db.ref('rooms/' + sala.name + '/players/' + _user)
+                firebase.db.ref('rooms/' + sala.name + '/players/' + player.nickname)
                     .update({ pontuacao: player.pontuacao + 2 })
             }
 
             if (filho == 10 || filho == 8) {
-                firebase.db.ref('rooms/' + sala.name + '/players/' + _user)
+                firebase.db.ref('rooms/' + sala.name + '/players/' + player.nickname)
                     .update({ pontuacao: player.pontuacao + 3 })
             }
 
             if (filho == 10) {
-                firebase.db.ref('rooms/' + sala.name + '/players/' + _user)
+                firebase.db.ref('rooms/' + sala.name + '/players/' + player.nickname)
                     .update({ pontuacao: player.pontuacao + 1 })
             }
         }
