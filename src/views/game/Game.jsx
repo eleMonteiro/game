@@ -182,8 +182,6 @@ export default class Game extends Component {
             player = snapshot.val()
         })
 
-        console.log(player);
-
         firebase.db.ref('rooms/' + sala.name + '/players/' + player.nickname)
             .update({ pontuacao: player.pontuacao + 1, requisitosClassificados: player.requisitosClassificados + 1 })
 
@@ -252,6 +250,7 @@ const styles = StyleSheet.create({
         height: '100%',
         alignItems: 'stretch',
         justifyContent: 'space-around',
+        backgroundColor: '#fa7921'
     },
 
     textRanking: {
