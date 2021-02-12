@@ -185,7 +185,7 @@ export default class Initial extends Component {
                             </>
                         }
                         {
-                            players >= 2 &&
+                            players >= 3 &&
                             <Button
                                 color='#FA7921'
                                 title='INICIAR'

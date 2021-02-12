@@ -110,7 +110,7 @@ export default class AjudaScreen extends Component {
             player = snapshot.val()
         })
 
-        firebase.db.ref('rooms/' + sala.name + '/players/' + user).update({ ajudasAnalista: player.ajudasAnalista - 1 })
+        firebase.db.ref('rooms/' + sala.name + '/players/' + player.nickname).update({ ajudasAnalista: player.ajudasAnalista - 1 })
 
         const req = this.state.req['tipo']
         var resposta = null
@@ -145,10 +145,15 @@ export default class AjudaScreen extends Component {
     usarProgramador() {
         const sala = this.state.sala
         var player
+
         const playerRef = firebase.db.ref('rooms/' + sala.name + '/players').child(this.props.route.params.vez);
         playerRef.on('value', (snapshot) => {
             player = snapshot.val()
         })
+
+
+        firebase.db.ref('rooms/' + sala.name + '/players/' + player.nickname).update({ ajudasProgramador: player.ajudasProgramador - 1 })
+
 
         const req = this.state.req['tipo']
 
