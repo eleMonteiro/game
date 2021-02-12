@@ -6,3 +6,5 @@ jogadores criará uma sala no jogo, e assim os demais participantes poderão ent
 
 O jogo trata-se de um jogo de cartas, digital desenvolvido utilizando o React Native, este será utilizado para o desenvolvimento do frontend e para o backend e 
 armazenamento de dados será utilizado o firebase. Sendo assim o jogo utilizará de tecnologias digitais e das cartas como principal ferramenta de interação. lém do mais o jogo será desenvolvido apenas na versão mobile.
+
+![](classifiqui.gif)
