@@ -119,7 +119,7 @@ const styles = StyleSheet.create({
         flex: 1,
         alignItems: 'stretch',
         justifyContent: 'center',
-        backgroundColor: '#feddc7',
+        backgroundColor: '#ffffff',
     },
 
     containerImagem: {

@@ -4,7 +4,7 @@ import { Alert, Button, Image, StyleSheet, Text, View } from 'react-native'
 
 import { BackHandler } from 'react-native';
 
-const Item = ({ user, tipo, title, url, classificarRequisito, req, navigation }) => (
+const Item = ({ user, tipo, title, url, classificarRequisito, req, navigation, indice }) => (
     <View style={styles.card}>
         <Image source={{ uri: url }} style={styles.imagem}></Image>
         <Button
@@ -22,7 +22,7 @@ const Item = ({ user, tipo, title, url, classificarRequisito, req, navigation })
                             },
                             {
                                 text: "OK", onPress: () => {
-                                    classificarRequisito(req, tipo, user)
+                                    classificarRequisito(req, tipo, user, indice)
                                     navigation.goBack()
                                 }
                             }
@@ -71,6 +71,7 @@ export default class ModalClassificar extends Component {
                 req={this.props.route.params.req}
                 navigation={this.props.navigation}
                 classificarRequisito={this.props.route.params.classificarRequisito}
+                indice={this.props.route.params.indice}
             />
         )
     };
@@ -82,8 +83,6 @@ export default class ModalClassificar extends Component {
     };
 
     render() {
-        const margin =  'oii'
-
         return (
             <View style={styles.container}>
                 <Swiper
@@ -120,12 +119,12 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         alignItems: 'stretch',
-        backgroundColor: '#feddc7',
+        backgroundColor: '#ffffff',
     },
 
     cardContainer: {
         flex: 1,
-        backgroundColor: '#feddc7',
+        backgroundColor: '#ffffff',
     },
 
     card: {
@@ -134,7 +133,7 @@ const styles = StyleSheet.create({
     },
 
     imagem: {
-        width: '95%',
+        width: '100%',
         height: '80%',
     },
 

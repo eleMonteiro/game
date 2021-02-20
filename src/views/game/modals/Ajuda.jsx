@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { Text, View, StyleSheet, Button, Alert, Image } from "react-native";
+import { Text, View, StyleSheet, Button, Alert, Image, ToastAndroid } from "react-native";
 import { TouchableOpacity } from "react-native-gesture-handler";
 
 import { BackHandler } from 'react-native';
@@ -91,6 +91,7 @@ export default class AjudaScreen extends Component {
         }
 
         BackHandler.addEventListener('hardwareBackPress', this.handleBackButtonClick);
+        ToastAndroid.show('CLIQUE NA CARTA PARA MUDAR O TIPO DA AJUDA', ToastAndroid.SHORT)
     }
 
     componentWillUnmount() {
@@ -255,7 +256,7 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         alignItems: 'stretch',
-        backgroundColor: '#feddc7',
+        backgroundColor: '#ffffff',
     },
 
     containerImagem: {

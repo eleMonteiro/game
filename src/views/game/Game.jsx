@@ -5,33 +5,13 @@ import * as firebase from '../../api/firebase'
 
 import { BackHandler } from 'react-native';
 
-function shuffle(array) {
-    var currentIndex = array.length, temporaryValue, randomIndex;
-
-    while (0 !== currentIndex) {
-        randomIndex = Math.floor(Math.random() * currentIndex);
-        currentIndex -= 1;
-        temporaryValue = array[currentIndex];
-        array[currentIndex] = array[randomIndex];
-        array[randomIndex] = temporaryValue;
-    }
-
-    return array;
-}
-
 function Item(props) {
     var requisitos = props.reqs
-    var reqs = []
 
-    for (var [key, value] of Object.entries(requisitos)) {
-        reqs.push(value);
-    }
-
-    var _reqs = shuffle(reqs)
-
-    for (let i = 0; i < _reqs.length; i++) {
-        const element = _reqs[i];
-        if (element['classificada'] == false) return (
+    for (let i = 0; i < requisitos.length; i++) {
+        const element = requisitos[i];
+        if (element['classificada'] == false) {
+        return (
             <View style={styles.containerImagem}>
                 <Image
                     source={{ uri: element['url'] }}
@@ -53,6 +33,7 @@ function Item(props) {
                                             vez: props.vez,
                                             mudarVez: props.mudarVez,
                                             classificarRequisito: props.classificarRequisito,
+                                            indice: i
                                         })
                             }
                         />
@@ -77,7 +58,7 @@ function Item(props) {
                     </>
                 }
             </View>
-        )
+        )}
     }
 
     return (
@@ -97,8 +78,6 @@ function Item(props) {
     )
 
 }
-
-
 export default class Game extends Component {
 
     constructor(props) {
@@ -120,11 +99,8 @@ export default class Game extends Component {
 
 
     componentDidMount() {
-        var _ordemJogada = null
         firebase.db.ref('rooms/' + this.state.sala.name).on('value', (snapshot) => {
             const data = snapshot.val();
-            _ordemJogada = data.ordemDeJogada
-
             this.setState({ ordemJogada: data.ordemDeJogada })
             this.setState({ vez: data.vez })
             this.setState({ requisitosClassificar: data.reqs })
@@ -170,12 +146,12 @@ export default class Game extends Component {
         this.setState({ bonus: false })
     }
 
-    classificarRequisito(requisito, tipo, user) {
+    classificarRequisito(requisito, tipo, user, indice) {
         const _requisito = requisito
         const _tipo = _requisito['tipo']
 
         if (_tipo == tipo) {
-            this.editarRequisitos(_requisito)
+            this.editarRequisitos(indice)
             this.pontuacao(this.state.vez)
             this.setState({ bonus: true })
         } else {
@@ -185,7 +161,7 @@ export default class Game extends Component {
     }
 
     editarRequisitos = (requisito) => {
-        firebase.db.ref('rooms/' + this.state.sala.name + '/reqs/' + requisito['name'])
+        firebase.db.ref('rooms/' + this.state.sala.name + '/reqs/' + requisito)
             .update({ classificada: true })
     }
 
@@ -254,7 +230,7 @@ const styles = StyleSheet.create({
         flex: 1,
         alignItems: 'stretch',
         justifyContent: 'space-around',
-        backgroundColor: '#feddc7',
+        backgroundColor: '#ffffff',
     },
 
     imagem: {

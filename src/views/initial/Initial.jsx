@@ -1,10 +1,23 @@
+import { enableExpoCliLogging } from "expo/build/logs/Logs";
 import React, { Component } from "react";
 import { Text, Button, Image, View, StyleSheet, ActivityIndicator, Alert } from "react-native";
-import { TouchableOpacity } from "react-native-gesture-handler";
 
-import { BackHandler, ToastAndroid } from 'react-native';
+import { BackHandler } from 'react-native';
 
 import * as firebase from '../../api/firebase'
+
+function shuffle(array) {
+    var tmp, current, top = array.length;
+
+    if (top)
+        while (--top) {
+            current = Math.floor(Math.random() * (top + 1));
+            tmp = array[current];
+            array[current] = array[top];
+            array[top] = tmp;
+        }
+    return array;
+}
 
 export default class Initial extends Component {
 
@@ -16,7 +29,8 @@ export default class Initial extends Component {
             user: null,
             players: 0,
             tipos: null,
-            bonus: null
+            bonus: null,
+            reqs: null
         }
     }
 
@@ -29,6 +43,31 @@ export default class Initial extends Component {
 
     componentWillUnmount() {
         BackHandler.removeEventListener('hardwareBackPress', this.handleBackButtonClick);
+    }
+
+    componentDidUpdate(prevStates) {
+        if (prevStates.reqs != this.state.reqs && this.state.sala.qtd == 1) {
+            var name = this.state.sala.name
+
+            var requisitos = this.state.reqs
+            var _requisitos = []
+
+            if (requisitos) {
+                for (var [key, value] of Object.entries(requisitos))
+                    _requisitos.push(value)
+            }
+
+            firebase.db.ref('rooms/' + name).update({ reqs: _requisitos });
+
+            for (let i = 0; i < _requisitos.length; i++) {
+                const element = _requisitos[i];
+                firebase.storage.refFromURL(element.url).getDownloadURL()
+                    .then(function (url) {
+                        firebase.db.ref('rooms/' + name + '/reqs/' + i)
+                            .update({ url: url });
+                    })
+            }
+        }
     }
 
     handleBackButtonClick() {
@@ -53,23 +92,15 @@ export default class Initial extends Component {
                 var tipo = itemRef.name.split('carta-')[1]
                 firebase.db.ref('rooms/' + name + '/reqs/' + itemRef.name.split('.')[0]).set({
                     name: itemRef.name.split('.')[0],
-                    url: itemRef.fullPath,
+                    url: 'gs://' + itemRef.bucket + '/' + itemRef.fullPath,
                     classificada: false,
                     classificou: null,
                     tipo: tipo.split(/(-\d)/)[0]
                 })
-
-                firebase.storage.ref(itemRef.fullPath).getDownloadURL()
-                    .then(function (url) {
-                        firebase.db.ref('rooms/' + name + '/reqs/' + itemRef.name.split('.')[0])
-                            .update({ url: url });
-                    })
             })
         }).catch(function (error) {
             console.log(error);
         });
-
-
     }
 
     players() {
@@ -79,6 +110,7 @@ export default class Initial extends Component {
             this.setState({ name: data.name })
             this.setState({ sala: data })
             this.setState({ players: data.qtd })
+            this.setState({ reqs: data.reqs })
         });
 
         firebase.db.ref('tipos/').once('value').then((snapshot) => {
@@ -89,7 +121,7 @@ export default class Initial extends Component {
 
     render() {
 
-        const { sala, user, players, tipos } = this.state
+        const { sala, user, players, tipos, reqs } = this.state
 
         return (
             <View style={styles.container}>
@@ -117,7 +149,11 @@ export default class Initial extends Component {
                                                     onPress: () => console.log("Cancel Pressed"),
                                                     style: "cancel"
                                                 },
-                                                { text: "OK", onPress: () => this.getSala('GREATOUR') }
+                                                {
+                                                    text: "OK", onPress: () => {
+                                                        this.getSala('GREATOUR')
+                                                    }
+                                                }
                                             ],
                                             { cancelable: false }
                                         )
@@ -157,7 +193,11 @@ export default class Initial extends Component {
                                                     onPress: () => console.log("Cancel Pressed"),
                                                     stSyle: "cancel"
                                                 },
-                                                { text: "OK", onPress: () => this.getSala('ADOTE') }
+                                                {
+                                                    text: "OK", onPress: () => {
+                                                        this.getSala('ADOTE')
+                                                    }
+                                                }
                                             ],
                                             { cancelable: false }
                                         )
@@ -190,12 +230,13 @@ export default class Initial extends Component {
                                 color='#FA7921'
                                 title='INICIAR'
                                 onPress={
-                                    () => this.props.navigation.navigate('Game', {
-                                        sala: sala,
-                                        user: user,
-                                        tipos: tipos
+                                    () => {
+                                        this.props.navigation.navigate('Game', {
+                                            sala: sala,
+                                            user: user,
+                                            tipos: tipos
+                                        })
                                     }
-                                    )
                                 }
                             />
                         }
@@ -212,7 +253,7 @@ const styles = StyleSheet.create({
         flex: 1,
         alignItems: 'stretch',
         justifyContent: 'space-around',
-        backgroundColor: '#feddc7',
+        backgroundColor: '#ffffff',
     },
 
     containerImagem: {
